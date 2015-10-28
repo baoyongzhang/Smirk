@@ -21,36 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.baoyz.smirk;
+package com.baoyz.smirk.compiler;
 
-import android.app.Activity;
+import com.squareup.javapoet.TypeName;
 
-import java.util.List;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.util.SimpleTypeVisitor7;
 
 /**
- * Created by baoyz on 15/10/27.
+ * Created by baoyz on 15/10/28.
  */
-public class Plugin$$SmirkManager implements Plugin, SmirkManager<Plugin> {
+public class TypeNames {
 
+    public TypeName forTypeMirror(TypeMirror mirror) {
+        return mirror.accept(new SimpleTypeVisitor7<TypeName, Void>(){
 
-    private List<Plugin> mList;
-
-    @Override
-    public void onCreate(Activity act) {
-        for (Plugin plugin : mList) {
-            plugin.onCreate(act);
-        }
-    }
-
-    @Override
-    public void onDestory(Activity act) {
-        for (Plugin plugin : mList) {
-            plugin.onDestory(act);
-        }
-    }
-
-    @Override
-    public void putAll(List<Plugin> list) {
-        mList = list;
+        }, null);
     }
 }

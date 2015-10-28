@@ -1,18 +1,18 @@
 /*
  * The MIT License (MIT)
- *
+ * 
  * Copyright (c) 2015 baoyongzhang <baoyz94@gmail.com>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,48 +23,42 @@
  */
 package com.baoyz.smirk.compiler;
 
-import com.baoyz.smirk.Extension;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 
-import java.util.Set;
-
-import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes("com.baoyz.smirk.Extension")
-public class SmirkProcessor extends AbstractProcessor {
+/**
+ * Created by baoyz on 15/10/28.
+ */
+public abstract class FilerGenerator implements Generator {
 
     private Filer mFiler;
+    private TypeElement mElement;
 
-    @Override
-    public synchronized void init(ProcessingEnvironment env) {
-        super.init(env);
-
-        mFiler = env.getFiler();
+    public FilerGenerator(Filer filer) {
+        mFiler = filer;
     }
 
+    public void setElement(TypeElement element) {
+        mElement = element;
+    }
+
+    public abstract TypeSpec onCreateTypeSpec(TypeElement element);
+
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public void generate() {
+        String qualifiedName = mElement.getQualifiedName().toString();
+        String packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
+        JavaFile javaFile = JavaFile.builder(packageName, onCreateTypeSpec(mElement)).build();
         try {
-            SmirkGenerator generator = new SmirkGenerator(mFiler);
-            Set<? extends Element> set = roundEnv
-                    .getElementsAnnotatedWith(Extension.class);
-            for (Element element : set) {
-                if (element instanceof TypeElement) {
-                    generator.setElement((TypeElement) element);
-                    generator.generate();
-                }
-            }
+            javaFile.writeTo(mFiler);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
+
+        System.out.println(javaFile.toString());
+
     }
 }

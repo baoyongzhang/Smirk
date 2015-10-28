@@ -1,5 +1,7 @@
 apply plugin: 'java'
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(':smirk')
+    compile 'com.squareup:javapoet:1.1.0'
 }

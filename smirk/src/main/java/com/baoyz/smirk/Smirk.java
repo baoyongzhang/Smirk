@@ -43,7 +43,7 @@ import dalvik.system.DexFile;
  */
 public class Smirk {
 
-    private static final String MANAGER_SUFFIX = "$$SmirkManager";
+    public static final String MANAGER_SUFFIX = "$$SmirkManager";
 
     private Map<DexFile, ExtensionClassLoader> mDexFiles;
     private Context mContext;
