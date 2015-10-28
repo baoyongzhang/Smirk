@@ -1,1 +1,1 @@
-include ':app', ':smirk-compiler', ':smirk'
+include ':demo', ':smirk-compiler', ':smirk', ':demo-extension', ':demo-extension-1', ':demo-extension-2'

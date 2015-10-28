@@ -122,7 +122,7 @@ public class Smirk {
             }
             if (cla == null)
                 continue;
-            if (cla.isAssignableFrom(cla)) {
+            if (clazz.isAssignableFrom(cla)) {
                 list.add(cla);
             }
         }
@@ -172,7 +172,7 @@ public class Smirk {
                         continue;
                     }
                     if (file.getName().endsWith(".dex")) {
-                        putDex(dexPath, dexMap);
+                        putDex(file.getAbsoluteFile(), dexMap);
                     }
                 }
             } else {
