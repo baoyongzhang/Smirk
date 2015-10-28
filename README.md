@@ -45,7 +45,11 @@ public class TextExtension1 implements TextExtension {
 我们编写了一个扩展类，实现了`TextExtension`，在`showText(TextView textView)`方法中将`textView`显示的文本设置为`TextExtension1 执行`。  
 当然我们编写多个`TextExtension`，写完之后，需要把扩展类文件编译为dex文件，然后主程序下载dex文件即可。
 
-###Gradle
+### Demo
+<p>
+   <img src="https://raw.githubusercontent.com/baoboy/image.baoboy.github.io/master/2015-10/smirk_demo.gif" width="320" alt="demo.gif"/>
+</p>
+### Gradle
 JCenter审核还未通过，想尝试的可以添加个maven的url。
 ```groovy
 repositories {
