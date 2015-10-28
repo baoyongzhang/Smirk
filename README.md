@@ -6,13 +6,14 @@ Smirk
 ##### 1、定义接口
 我们需要定义一套接口，因为扩展肯定是由主程序调用执行的，也就是主程序必须提前知道扩展程序有哪些方法，所以需要定义接口规范。例如：
 ```java
+@Extension
 public interface TextExtension {
 
     void showText(TextView textView);
 }
 ```
 
-这里定义了一个接口`TextExtension`，暴露了一个方法`showText(TextView textView)`。
+这里定义了一个接口`TextExtension`，暴露了一个方法`showText(TextView textView)`，需要用`@Extension`注解修饰。
 
 ##### 2、在是适当的地方调用扩展
 我们必须在主程序需要的地方调用扩展，这里是动态加载的重点，因为我们在编写主程序的时候还不知道以后想要扩展什么功能，当我们想要添加扩展功能的时候，需要讲新功能编译为一个dex文件，主程序下载到本地，使用`Smirk`加载即可。
