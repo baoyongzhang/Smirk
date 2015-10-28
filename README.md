@@ -45,3 +45,16 @@ public class TextExtension1 implements TextExtension {
 我们编写了一个扩展类，实现了`TextExtension`，在`showText(TextView textView)`方法中将`textView`显示的文本设置为`TextExtension1 执行`。  
 当然我们编写多个`TextExtension`，写完之后，需要把扩展类文件编译为dex文件，然后主程序下载dex文件即可。
 
+###Gradle
+JCenter审核还未通过，想尝试的可以添加个maven的url。
+```groovy
+repositories {
+    // ...
+    maven{
+        url 'https://bintray.com/artifact/download/baoyongzhang/maven'
+    }
+}
+
+compile 'com.baoyz.smirk:smirk:0.1.0'
+compile 'com.baoyz.smirk:smirk-compiler:0.1.0'
+```
