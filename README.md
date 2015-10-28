@@ -56,5 +56,5 @@ repositories {
 }
 
 compile 'com.baoyz.smirk:smirk:0.1.0'
-compile 'com.baoyz.smirk:smirk-compiler:0.1.0'
+provided 'com.baoyz.smirk:smirk-compiler:0.1.0'
 ```
