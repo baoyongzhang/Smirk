@@ -24,7 +24,6 @@
 package com.baoyz.smirk;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.baoyz.smirk.exception.SmirkManagerNotFoundException;
 
@@ -32,9 +31,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
 
 /**
@@ -44,12 +45,14 @@ public class Smirk {
 
     private static final String MANAGER_SUFFIX = "$$SmirkManager";
 
-    private List<DexFile> mDexFiles;
+    private Map<DexFile, ExtensionClassLoader> mDexFiles;
     private Context mContext;
+    private Map<String, SmirkManager> mManagerCache;
 
-    public Smirk(Context context, List<DexFile> dexFiles) {
+    public Smirk(Context context, Map<DexFile, ExtensionClassLoader> dexFiles) {
         mDexFiles = dexFiles;
         mContext = context;
+        mManagerCache = new HashMap<>();
     }
 
     public <T> T create(Class<T> clazz) {
@@ -62,8 +65,12 @@ public class Smirk {
 
     private <T> SmirkManager findExtensionManager(Class<T> clazz) {
         String className = clazz.getCanonicalName() + MANAGER_SUFFIX;
+        SmirkManager manager = mManagerCache.get(className);
+        if (manager != null) {
+            return manager;
+        }
         try {
-            SmirkManager manager = (SmirkManager) Class.forName(className).newInstance();
+            manager = (SmirkManager) Class.forName(className).newInstance();
             List<T> extensionInstances = findExtensionInstances(clazz);
             manager.putAll(extensionInstances);
             return manager;
@@ -95,20 +102,24 @@ public class Smirk {
 
     private <T> List<Class<T>> findSubClasses(Class<T> clazz) {
         List<Class<T>> list = new ArrayList<>();
-        for (DexFile dexFile : mDexFiles) {
-            list.addAll(findSubClassesFromDexFile(dexFile, clazz));
+        Set<Map.Entry<DexFile, ExtensionClassLoader>> entries = mDexFiles.entrySet();
+        for (Map.Entry<DexFile, ExtensionClassLoader> dexEntry : entries) {
+            list.addAll(findSubClassesFromDexFile(dexEntry, clazz));
         }
         return list;
     }
 
-    private <T> List<Class<T>> findSubClassesFromDexFile(DexFile dexFile, Class<T> clazz) {
+    private <T> List<Class<T>> findSubClassesFromDexFile(Map.Entry<DexFile, ExtensionClassLoader> dexEntry, Class<T> clazz) {
         List<Class<T>> list = new ArrayList<>();
-        Enumeration<String> entries = dexFile.entries();
+        Enumeration<String> entries = dexEntry.getKey().entries();
         while (entries.hasMoreElements()) {
             String name = entries.nextElement();
-            Log.e("byz", "findSubClass " + name);
-            // TODO 这样无法load到Class,应该需要创建DexClassLoader
-            Class cla = dexFile.loadClass(name, dexFile.getClass().getClassLoader());
+            Class cla = null;
+            try {
+                cla = dexEntry.getValue().loadClass(name);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
             if (cla == null)
                 continue;
             if (cla.isAssignableFrom(cla)) {
@@ -121,11 +132,11 @@ public class Smirk {
     public static class Builder {
 
         private Context mContext;
-        private List<DexFile> mDexFiles;
+        private Map<DexFile, ExtensionClassLoader> mDexFiles;
 
         public Builder(Context context) {
             mContext = context;
-            mDexFiles = new ArrayList<>();
+            mDexFiles = new HashMap<>();
         }
 
         public Builder addDexPath(String dexPath) {
@@ -134,9 +145,9 @@ public class Smirk {
         }
 
         public Builder addDexPath(File dexPath) {
-            List<DexFile> list = loadDex(dexPath);
-            if (list != null) {
-                mDexFiles.addAll(list);
+            Map<DexFile, ExtensionClassLoader> map = loadDex(dexPath);
+            if (map != null) {
+                mDexFiles.putAll(map);
             }
             return this;
         }
@@ -145,43 +156,42 @@ public class Smirk {
             return new Smirk(mContext, mDexFiles);
         }
 
-        private List<DexFile> loadDex(File dexPath) {
+        private Map<DexFile, ExtensionClassLoader> loadDex(File dexPath) {
 
             if (dexPath == null || !dexPath.exists()) {
                 return null;
             }
 
-            List<DexFile> dexList = new ArrayList<>();
+            Map<DexFile, ExtensionClassLoader> dexMap = new HashMap<>();
 
             if (dexPath.isDirectory()) {
                 File[] files = dexPath.listFiles();
                 for (File file : files) {
                     if (file.isDirectory()) {
-                        dexList.addAll(loadDex(file));
+                        dexMap.putAll(loadDex(file));
                         continue;
                     }
                     if (file.getName().endsWith(".dex")) {
-                        try {
-                            DexFile.loadDex(dexPath.getAbsolutePath(), File.createTempFile("opt", "dex",
-                                    mContext.getFilesDir()).getPath(), 0);
-                            dexList.add(new DexFile(dexPath));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        putDex(dexPath, dexMap);
                     }
                 }
             } else {
                 if (dexPath.getName().endsWith(".dex")) {
-                    try {
-                        File tmp = mContext.getDir("osdk", 0);
-                        DexFile.loadDex(dexPath.getAbsolutePath(), tmp.getAbsolutePath(), 0);
-                        dexList.add(new DexFile(dexPath));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    putDex(dexPath, dexMap);
                 }
             }
-            return dexList;
+            return dexMap;
+        }
+
+        private void putDex(File dexPath, Map<DexFile, ExtensionClassLoader> dexMap) {
+            try {
+                File outPath = mContext.getDir("smirk", 0);
+                DexFile dexFile = DexFile.loadDex(dexPath.getAbsolutePath(), new File(outPath, dexPath.getName()).getAbsolutePath(), 0);
+                ExtensionClassLoader classLoader = new ExtensionClassLoader(dexPath.getAbsolutePath(), outPath.getAbsolutePath(), null, mContext.getClassLoader());
+                dexMap.put(dexFile, classLoader);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }

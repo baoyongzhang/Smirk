@@ -26,8 +26,6 @@ package com.baoyz.smirk;
 import android.annotation.TargetApi;
 import android.os.Build;
 
-import java.util.List;
-
 import dalvik.system.DexClassLoader;
 
 /**
@@ -39,13 +37,5 @@ public class ExtensionClassLoader extends DexClassLoader {
     @TargetApi(Build.VERSION_CODES.CUPCAKE)
     public ExtensionClassLoader(String dexPath, String optimizedDirectory, String libraryPath, ClassLoader parent) {
         super(dexPath, optimizedDirectory, libraryPath, parent);
-    }
-
-    public <T> Class<T>[] loadClasses(Class<T> clszz) {
-        Package[] packages = super.getPackages();
-        for (Package pack:packages){
-
-        }
-        return null;
     }
 }
