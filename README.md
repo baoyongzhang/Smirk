@@ -61,3 +61,14 @@ repositories {
 compile 'com.baoyz.smirk:smirk:0.1.0'
 provided 'com.baoyz.smirk:smirk-compiler:0.1.0'
 ```
+
+### 编译dex
+
+# 感谢
+[javapoet](https://github.com/square/javapoet)
+License
+=======
+
+    The MIT License (MIT)
+
+	Copyright (c) 2015 baoyongzhang <baoyz94@gmail.com>
