@@ -1,0 +1,13 @@
+task buildDex(dependsOn: build, type: Exec) {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def sdkDir = properties.getProperty('sdk.dir')
+    if (sdkDir == null || sdkDir.isEmpty()) {
+        sdkDir = System.getenv("ANDROID_HOME")
+    }
+    def dx = "${sdkDir}/build-tools/${android.buildToolsVersion}/dx"
+    def output = file("build/outputs/dex")
+    output.mkdirs()
+    commandLine dx
+    args '--dex', "--output=${output}/${project.name}.dex", 'build/intermediates/bundles/release/classes.jar'
+}
