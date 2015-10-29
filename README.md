@@ -49,15 +49,7 @@ public class TextExtension1 implements TextExtension {
    <img src="https://raw.githubusercontent.com/baoboy/image.baoboy.github.io/master/2015-10/smirk_demo.gif" width="320" alt="demo.gif"/>
 </p>
 ## Gradle
-JCenter审核还未通过，想尝试的可以添加个maven的url。
 ```groovy
-repositories {
-    // ...
-    maven{
-        url 'https://bintray.com/artifact/download/baoyongzhang/maven'
-    }
-}
-
 compile 'com.baoyz.smirk:smirk:0.1.0'
 provided 'com.baoyz.smirk:smirk-compiler:0.1.0'
 ```
