@@ -44,11 +44,11 @@ public class TextExtension1 implements TextExtension {
 我们编写了一个扩展类，实现了`TextExtension`，在`showText(TextView textView)`方法中将`textView`显示的文本设置为`TextExtension1 执行`。  
 当然我们编写多个`TextExtension`，写完之后，需要把扩展类文件编译为dex文件，然后主程序下载dex文件即可。
 
-### Demo
+## Demo
 <p>
    <img src="https://raw.githubusercontent.com/baoboy/image.baoboy.github.io/master/2015-10/smirk_demo.gif" width="320" alt="demo.gif"/>
 </p>
-### Gradle
+## Gradle
 JCenter审核还未通过，想尝试的可以添加个maven的url。
 ```groovy
 repositories {
@@ -62,9 +62,31 @@ compile 'com.baoyz.smirk:smirk:0.1.0'
 provided 'com.baoyz.smirk:smirk-compiler:0.1.0'
 ```
 
-### 编译dex
+## 编译dex
+当编写扩展程序的时候，我们可以在`AndroidStudio`中新建一个`Android Library`，下面是我自己写的脚本，用于编译dex文件，复制到`build.gradle`中。
+```groovy
+task buildDex(dependsOn: build, type: Exec) {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def sdkDir = properties.getProperty('sdk.dir')
+    if (sdkDir == null || sdkDir.isEmpty()) {
+        sdkDir = System.getenv("ANDROID_HOME")
+    }
+    def dx = "${sdkDir}/build-tools/${android.buildToolsVersion}/dx"
+    def output = file("build/outputs/dex")
+    output.mkdirs()
+    commandLine dx
+    args '--dex', "--output=${output}/${project.name}.dex", 'build/intermediates/bundles/release/classes.jar'
+}
+```
+然后运行
+```shell
+$ ./gradlew buildDex
+```
+成功之后，会在`build/outputs/dex`目录中生成一个dex文件。  
+(Gradle我并不熟悉，如果有更好的写法感谢指正)
 
-# 感谢
+## 感谢
 [javapoet](https://github.com/square/javapoet)
 License
 =======
@@ -72,3 +94,20 @@ License
     The MIT License (MIT)
 
 	Copyright (c) 2015 baoyongzhang <baoyz94@gmail.com>
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
