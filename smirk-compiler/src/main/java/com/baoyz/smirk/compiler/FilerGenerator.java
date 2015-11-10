@@ -58,7 +58,5 @@ public abstract class FilerGenerator implements Generator {
             e.printStackTrace();
         }
 
-        System.out.println(javaFile.toString());
-
     }
 }
