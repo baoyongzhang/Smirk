@@ -1,6 +1,6 @@
 Smirk
 ===================
-[ ![Download](https://api.bintray.com/packages/baoyongzhang/maven/Smirk/images/download.svg) ](https://bintray.com/baoyongzhang/maven/Smirk/_latestVersion)  
+[ ![Travis CI](https://travis-ci.org/baoyongzhang/Smirk.svg?branch=master) ](https://travis-ci.org/baoyongzhang/Smirk) [ ![Download](https://api.bintray.com/packages/baoyongzhang/maven/Smirk/images/download.svg) ](https://bintray.com/baoyongzhang/maven/Smirk/_latestVersion)  
 `Smirk`是一个Android运行时动态扩展库，其本质就是动态加载dex文件，`Smirk`进行了封装，可以很方便的完成动态dex的加载，以及调用。
 ## 使用方法
 ##### 1、定义接口
